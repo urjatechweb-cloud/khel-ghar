@@ -91,4 +91,25 @@ assert.throws(() => G.callbreak.act(cb, 0, { type: 'bid', v: 3 }), /Not your tur
 assert.throws(() => G.callbreak.act(cb, cb.turn, { type: 'bid', v: 9 }), /1–8/);
 const kt = G.kitti.init(2);
 assert.throws(() => G.kitti.act(kt, 0, { type: 'submit', groups: [kt.hands[1].slice(0, 3), kt.hands[0].slice(3, 6), kt.hands[0].slice(6)] }));
+// Room hub (shared by the LAN server and browser hosts): seats, privacy, leave → bot, last human closes
+{
+  const { _util, ...GAMES } = G, hub = require('./rooms').createHub(GAMES), seen = { a: [], b: [] };
+  const { code } = hub.call('create', { pid: 'a', name: 'Asha', game: 'callbreak', code: '55555' });
+  assert.strictEqual(code, '55555');
+  assert.match(hub.call('create', { pid: 'z', name: 'Z', game: 'ludo', code: null }).code, /^\d{4}$/); // no code → generated
+  hub.subscribe(code, 'a', v => seen.a.push(v)); hub.subscribe(code, 'b', v => seen.b.push(v));
+  hub.call('join', { pid: 'b', name: 'Bikram', code });
+  assert.throws(() => hub.call('addBot', { pid: 'b', code }), /host/);
+  hub.call('addBot', { pid: 'a', code }); hub.call('addBot', { pid: 'a', code });
+  hub.call('start', { pid: 'a', code });
+  const va = seen.a[seen.a.length - 1], vb = seen.b[seen.b.length - 1];
+  assert.strictEqual(va.state.hand.length, 13); assert.strictEqual(vb.you, 1);
+  assert.notDeepStrictEqual(va.state.hand, vb.state.hand); // each player only sees their own cards
+  assert(!JSON.stringify(vb).includes('"hands"'));
+  hub.call('leave', { pid: 'b', code });
+  assert(hub.rooms.get(code).seats[1].bot);
+  hub.call('leave', { pid: 'a', code });
+  assert(!hub.rooms.has(code)); assert.deepStrictEqual(seen.b[seen.b.length - 1], { gone: true });
+  assert.throws(() => hub.call('info', { pid: 'a' }), /Unknown request/);
+}
 console.log('All checks passed');

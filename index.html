@@ -239,7 +239,9 @@ svg.bc{width:100%;max-width:440px;display:block;margin:6px auto;filter:drop-shad
 <div id="app"></div>
 <div id="layer"></div>
 <div id="toast"></div>
-<script src="/games.js"></script>
+<script src="games.js"></script>
+<script src="rooms.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.5/peerjs.min.js"></script>
 <script>
 'use strict';
 const U = window.Games._util;
@@ -292,41 +294,178 @@ function toggleMute() { store.set('mute', store.get('mute', '0') === '1' ? '0' :
 
 // ---------- networking ----------
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2400); }
+// Two transports: 'server' = the LAN Node server (Wi-Fi / hotspot); 'p2p' = static hosting (GitHub Pages),
+// where the room creator's browser runs the room (rooms.js) and friends connect over PeerJS.
+const NET = { mode: 'server', hub: null, peer: null, hostCode: null, conn: null, unsub: null, pending: new Map(), seq: 0, wake: null };
+const PEER_PREFIX = 'khelghar-v1-';
+const isHost = () => NET.mode === 'p2p' && NET.hub && NET.hostCode && NET.hostCode === code;
 async function api(type, data = {}) {
+  let j;
   try {
-    const r = await fetch('/api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, pid, code, ...data }) });
-    const j = await r.json();
-    if (j.error) { toast(j.error); buzz(80); }
-    return j;
-  } catch { toast('Connection lost – check the Wi-Fi'); return { error: 'net' }; }
+    if (NET.mode === 'server') {
+      const r = await fetch('api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, pid, code, ...data }) });
+      j = await r.json();
+    } else j = await p2pApi(type, data);
+  } catch (e) { j = { error: NET.mode === 'server' ? 'Connection lost – check the Wi-Fi' : (e && e.message) || 'Connection lost' }; }
+  if (j.error) { toast(j.error); buzz(80); }
+  return j;
 }
 const act = action => { if (AC && AC.state === 'suspended') AC.resume(); return api('act', { action }); };
+function onView(d) {
+  if (d.gone) { leaveLocal(); toast('Room closed'); return; }
+  P = R; R = d;
+  if (!P || P.code !== R.code || !!P.state !== !!R.state) { ui.seen.clear(); ui.lp = null; ui.animId++; ui.kitti = null; ui.rolls = null; }
+  onUpdate(P, R);
+  render();
+}
 function connect(c) {
   code = c; store.set('code', c);
-  if (es) es.close();
-  es = new EventSource(`/events?code=${encodeURIComponent(c)}&pid=${encodeURIComponent(pid)}`);
-  es.onmessage = e => {
-    const d = JSON.parse(e.data);
-    if (d.gone) { leaveLocal(); toast('Room closed'); return; }
-    P = R; R = d;
-    if (!P || P.code !== R.code || !!P.state !== !!R.state) { ui.seen.clear(); ui.lp = null; ui.animId++; ui.kitti = null; ui.rolls = null; }
-    onUpdate(P, R);
-    render();
-  };
+  if (NET.mode === 'server') {
+    if (es) es.close();
+    es = new EventSource(`events?code=${encodeURIComponent(c)}&pid=${encodeURIComponent(pid)}`);
+    es.onmessage = e => onView(JSON.parse(e.data));
+    return;
+  }
+  if (isHost()) { if (NET.unsub) NET.unsub(); NET.unsub = NET.hub.subscribe(c, pid, onView); return; }
+  (async () => {
+    try { if (!NET.conn || !NET.conn.open) await guestConnect(c); NET.conn.send({ kind: 'sub', code: c, pid }); }
+    catch (e) { toast(e.message); leaveLocal(); }
+  })();
 }
-function leaveLocal() { ui.animId++; ui.lp = null; if (es) es.close(); es = null; R = P = null; code = null; store.set('code', ''); closeLayer(); render(); }
+// ----- p2p host side
+function startPeer(id) {
+  return new Promise((res, rej) => {
+    const p = id ? new Peer(id, { debug: 0 }) : new Peer({ debug: 0 });
+    p.once('open', () => res(p));
+    p.once('error', e => { p.destroy(); rej(e); });
+  });
+}
+function hostSave(room) { try { if (room) localStorage.setItem('hostRoom', JSON.stringify(room)); else localStorage.removeItem('hostRoom'); } catch {} }
+function hostListen(peer, c) {
+  NET.peer = peer; NET.hostCode = c; store.set('hosting', c);
+  peer.on('connection', onGuest);
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch {} });
+  peer.on('error', e => { if (e.type !== 'peer-unavailable') console.warn('peer', e.type); });
+  try { navigator.wakeLock && navigator.wakeLock.request('screen').then(w => { NET.wake = w; }, () => {}); } catch {}
+}
+async function hostCreate(game) {
+  if (!window.Peer) throw new Error('Online play needs internet – reload the page');
+  NET.hub = NET.hub || Rooms.createHub(window.Games, { onChange: hostSave });
+  for (let tries = 0; tries < 5; tries++) {
+    const c = String(10000 + Math.floor(Math.random() * 90000));
+    let peer;
+    try { peer = await startPeer(PEER_PREFIX + c); } catch (e) { if (e.type === 'unavailable-id') continue; throw new Error('Could not reach the online service – check internet'); }
+    hostListen(peer, c);
+    return NET.hub.call('create', { pid, name: nameVal(), game, code: c });
+  }
+  throw new Error('Could not open a room – try again');
+}
+async function hostResume() { // the host refreshed: bring the saved room back under the same code
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('hostRoom') || 'null'); } catch {}
+  if (!saved || saved.code !== code || !window.Peer) return false;
+  NET.hub = Rooms.createHub(window.Games, { onChange: hostSave });
+  NET.hub.restore(saved);
+  for (let tries = 0; tries < 6; tries++) {
+    try { hostListen(await startPeer(PEER_PREFIX + code), code); return true; }
+    catch (e) { if (e.type !== 'unavailable-id') break; await sleep(3000); } // old connection still registered
+  }
+  toast('Could not reopen your room online');
+  return true;
+}
+function onGuest(conn) {
+  let unsub = null;
+  conn.on('data', m => {
+    if (!m || typeof m !== 'object' || typeof m.pid !== 'string') return;
+    if (m.kind === 'sub') { if (unsub) unsub(); unsub = NET.hub.subscribe(NET.hostCode, m.pid, d => { if (conn.open) conn.send({ kind: 'view', data: d }); }); }
+    if (m.kind === 'api') {
+      let out;
+      try { if (m.type === 'create') throw new Error('Not allowed'); out = NET.hub.call(m.type, { ...(m.payload || {}), pid: m.pid, code: NET.hostCode }); }
+      catch (e) { out = { error: e.message }; }
+      conn.send({ kind: 'res', id: m.id, out });
+    }
+  });
+  conn.on('close', () => { if (unsub) unsub(); unsub = null; });
+}
+function hostClose() {
+  if (NET.hub && NET.hostCode) NET.hub.close(NET.hostCode);
+  if (NET.peer) NET.peer.destroy();
+  if (NET.wake) NET.wake.release().catch(() => {});
+  Object.assign(NET, { hub: null, peer: null, hostCode: null, unsub: null, wake: null });
+  store.set('hosting', ''); hostSave(null);
+}
+// ----- p2p guest side
+async function guestConnect(c) {
+  if (!window.Peer) throw new Error('Online play needs internet – reload the page');
+  if (!NET.peer || NET.peer.destroyed) NET.peer = await startPeer(null).catch(() => { throw new Error('Could not reach the online service – check internet'); });
+  if (NET.peer.disconnected) NET.peer.reconnect();
+  return new Promise((res, rej) => {
+    const conn = NET.peer.connect(PEER_PREFIX + c, { reliable: true, serialization: 'json' });
+    const fail = msg => { clearTimeout(t); NET.peer.off('error', onErr); rej(new Error(msg)); };
+    const onErr = e => { if (e.type === 'peer-unavailable') fail('Room not found – check the code (the host must keep the game open)'); };
+    const t = setTimeout(() => fail('Could not connect to the room'), 15000);
+    NET.peer.on('error', onErr);
+    conn.on('open', () => { clearTimeout(t); NET.peer.off('error', onErr); NET.conn = conn; res(conn); });
+    conn.on('data', m => {
+      if (m.kind === 'res') { const done = NET.pending.get(m.id); if (done) { NET.pending.delete(m.id); done(m.out); } }
+      if (m.kind === 'view') onView(m.data);
+    });
+    conn.on('close', () => {
+      if (NET.conn !== conn) return;
+      NET.conn = null;
+      if (code) { toast('Reconnecting to host…'); setTimeout(() => { if (code && !NET.conn) connect(code); }, 2500); }
+    });
+  });
+}
+async function p2pApi(type, data) {
+  if (type === 'create') return hostCreate(data.game);
+  if (isHost()) return NET.hub.call(type, { ...data, pid, code });
+  if (type === 'join' && (!NET.conn || !NET.conn.open || NET.conn.peer !== PEER_PREFIX + data.code)) {
+    if (NET.conn) { const old = NET.conn; NET.conn = null; old.close(); }
+    await guestConnect(data.code);
+  }
+  if (!NET.conn || !NET.conn.open) return { error: 'Not connected to the host' };
+  return new Promise(res => {
+    const id = ++NET.seq;
+    NET.pending.set(id, res);
+    NET.conn.send({ kind: 'api', id, type, pid, payload: data });
+    setTimeout(() => { if (NET.pending.delete(id)) res({ error: 'The host did not answer' }); }, 10000);
+  });
+}
+function leaveLocal() {
+  const c = code;
+  ui.animId++; ui.lp = null; R = P = null; code = null; store.set('code', '');
+  if (es) es.close(); es = null;
+  if (NET.unsub) { NET.unsub(); NET.unsub = null; }
+  if (NET.mode === 'p2p' && NET.hostCode && NET.hostCode === c) hostClose();
+  if (NET.conn) { const old = NET.conn; NET.conn = null; old.close(); }
+  closeLayer(); render();
+}
 function nameVal() { const n = ($('#name') ? $('#name').value : store.get('name', '')).trim(); if (n) store.set('name', n); return n; }
 async function create(game) {
   const n = nameVal(); if (!n) { $('#name').focus(); return toast('पहिले नाम लेख्नुहोस् · Enter your name'); }
+  if (NET.mode === 'p2p') toast('Opening an online room…');
   const j = await api('create', { name: n, game }); if (j.code) connect(j.code);
 }
-async function join() {
-  const n = nameVal(); if (!n) { $('#name').focus(); return toast('पहिले नाम लेख्नुहोस् · Enter your name'); }
-  const c = $('#jcode').value.trim();
-  if (!/^\d{4}$/.test(c)) return toast('Enter the 4-digit room code');
+async function join(c) {
+  const n = nameVal(); if (!n) { if ($('#name')) $('#name').focus(); return toast('पहिले नाम लेख्नुहोस् · Enter your name'); }
+  c = String(c || $('#jcode').value).trim();
+  if (!/^\d{4,5}$/.test(c)) return toast('Enter the room code');
+  if (NET.mode === 'p2p') toast('Connecting to the room…');
   const j = await api('join', { name: n, code: c }); if (j.code) connect(j.code);
 }
-async function doLeave() { closeLayer(); if (es) es.close(); es = null; await api('leave'); leaveLocal(); }
+async function doLeave() {
+  closeLayer();
+  if (es) es.close(); es = null;
+  if (isHost() && R && R.seats.filter(x => !x.bot).length > 1) return dialog(`<h2>You are the host</h2><p class="sub">The room runs on your phone. Leaving closes it for everyone.</p><div class="row2"><button class="btn dark" onclick="closeLayer()">Stay</button><button class="btn" onclick="closeLayer();leaveLocal()">Close room</button></div>`);
+  await api('leave'); leaveLocal();
+}
+function shareLink() { return `${location.origin}${location.pathname}?room=${R.code}`; }
+async function shareRoom() {
+  const url = shareLink(), text = `Play ${INFO.games[R.game].name} with me on Khel Ghar! Room ${R.code}`;
+  try { if (navigator.share) return await navigator.share({ title: 'Khel Ghar', text, url }); } catch { return; }
+  try { await navigator.clipboard.writeText(url); toast('Link copied – paste it to your friends'); } catch { toast(url); }
+}
 function askLeave() {
   if (!R || !R.state) return doLeave();
   dialog(`<h2>Leave game?</h2><p class="sub">A bot will take over your seat so others can finish.</p><div class="row2"><button class="btn dark" onclick="closeLayer()">Stay</button><button class="btn" onclick="doLeave()">Leave</button></div>`);
@@ -414,13 +553,14 @@ function renderHome(app) {
   const addr = local && INFO ? INFO.ips.map(ip => `http://${ip}:${INFO.port}`).join('<br>') : esc(location.origin);
   const name = store.get('name', '');
   app.innerHTML = `${flags()}<div class="hero"><svg viewBox="0 0 400 90" preserveAspectRatio="none"><defs><linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#c9b6c8"/><stop offset="1" stop-color="#3b1030"/></linearGradient></defs><path d="M0 90 L40 52 L62 66 L110 18 L140 48 L170 30 L205 6 L240 44 L262 34 L300 60 L330 26 L370 58 L400 40 L400 90Z" fill="url(#m)"/><path d="M0 90 L60 64 L120 78 L190 58 L260 80 L330 62 L400 76 L400 90Z" fill="#16040a"/></svg>
-    <h1>खेल घर</h1><p>Khel Ghar · Nepali games on Wi-Fi & hotspot</p></div>
+    <h1>खेल घर</h1><p>Khel Ghar · Nepali games with friends · online, Wi-Fi & hotspot</p></div>
   <div class="profile glass"><div class="av" style="background:${AVC[2]}">${esc([...(name || '?')][0]).toUpperCase()}</div><input id="name" maxlength="16" value="${esc(name)}" placeholder="तपाईंको नाम · Your name" oninput="this.previousElementSibling.textContent=([...this.value.trim()][0]||'?').toUpperCase()"></div>
   <div class="sec">खेल छान्नुहोस्<span>Choose a game</span></div>
   <div class="games">${games.map(([k, g]) => `<button class="tile t-${k}" onclick="create('${k}')"><span class="art">${GAME[k].art}</span><b>${esc(g.np)}</b><small>${esc(g.name)} · ${GAME[k].tag}</small><em>👥 ${g.min === g.max ? g.min : g.min + '–' + g.max}</em></button>`).join('')}</div>
   <div class="sec">कोठामा जानुहोस्<span>Join a friend</span></div>
-  <div class="joinrow"><input id="jcode" inputmode="numeric" maxlength="4" placeholder="0000" onkeydown="if(event.key==='Enter')join()"><button class="btn blue" onclick="join()">Join</button></div>
-  <div class="addr glass">📶 Friends on the same Wi-Fi / hotspot open<b>${addr}</b></div>`;
+  <div class="joinrow"><input id="jcode" inputmode="numeric" maxlength="5" placeholder="00000" value="${esc(ui.invite || '')}" onkeydown="if(event.key==='Enter')join()"><button class="btn blue" onclick="join()">Join</button></div>
+  ${NET.mode === 'p2p' ? `<div class="addr glass">🌐 Online · start a game, then tap <b style="display:inline">Share</b> to invite friends anywhere</div>` : `<div class="addr glass">📶 Friends on the same Wi-Fi / hotspot open<b>${addr}</b></div>`}`;
+  if (ui.invite && !ui.invited) { ui.invited = true; $('#name').focus(); toast('Enter your name, then tap Join'); }
 }
 function renderLobby(app) {
   const G = INFO ? INFO.games[R.game] : { min: 2, max: 6, np: R.game, name: R.game };
@@ -428,7 +568,7 @@ function renderLobby(app) {
   let slots = R.seats.map((s, i) => `<div class="slotp">${avatar(i)}<div class="nm">${nm(i)}${i === R.you ? ' <span class="muted">(you)</span>' : ''}<small>${s.bot ? 'Computer player' : R.host && i === R.you || (!R.host && i === 0) ? 'Host' : s.online ? 'Ready' : 'Offline'}</small></div>${R.host && i !== R.you ? `<button class="ib" onclick="api('kick',{seat:${i}})" aria-label="Remove">✕</button>` : ''}</div>`).join('');
   for (let i = n; i < G.max; i++) slots += `<div class="slotp empty"><div class="dot"></div><div class="nm" style="font-weight:500">Empty seat</div>${R.host ? `<button class="btn dark" style="padding:8px 12px" onclick="api('addBot')">+ Bot</button>` : ''}</div>`;
   app.innerHTML = `${flags()}<div class="bar"><button class="ib" onclick="askLeave()">‹</button><div class="ttl">${GAME[R.game].art} ${esc(G.np)}<small>${esc(G.name)}</small></div></div>
-  <div class="codebox glass"><div class="muted small">ROOM CODE · कोठा नम्बर</div><div class="code">${R.code}</div><div class="muted small">Friends: open this app → Join → enter the code</div></div>
+  <div class="codebox glass"><div class="muted small">ROOM CODE · कोठा नम्बर</div><div class="code">${R.code}</div>${NET.mode === 'p2p' ? `<button class="btn blue" style="margin-top:10px" onclick="shareRoom()">📤 Share invite link</button><div class="muted small" style="margin-top:8px">${isHost() ? 'You are hosting – keep this app open while you play' : 'Friends can also open the app → Join → enter the code'}</div>` : '<div class="muted small">Friends: open this app → Join → enter the code</div>'}</div>
   <div class="slots">${slots}</div>
   ${R.you < 0 ? `<div class="pad"><button class="btn blue wide" onclick="api('join',{name:store.get('name','Player')})">Take a seat</button></div>` : ''}
   <div class="rules glass">${RULES[R.game]}</div>
@@ -717,9 +857,26 @@ async function ludoAnimate(a, s) {
 }
 
 window.addEventListener('resize', () => { clearTimeout(window.rz); window.rz = setTimeout(render, 150); });
-fetch('/api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"type":"info"}' })
-  .then(r => r.json()).then(j => { INFO = j; render(); }).catch(() => toast('Cannot reach the game server'));
-if (code) connect(code); else render();
+(async function boot() {
+  try {
+    if (location.hostname.endsWith('github.io') || location.protocol === 'file:') throw new Error('static');
+    const r = await fetch('api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"type":"info"}' });
+    if (!r.ok) throw new Error('static');
+    INFO = await r.json();
+  } catch { // no LAN server here (e.g. GitHub Pages): play online, rooms hosted in the browser
+    NET.mode = 'p2p';
+    INFO = { ips: [], port: 0, games: Object.fromEntries(Object.entries(window.Games).filter(([k]) => k[0] !== '_').map(([k, g]) => [k, { name: g.name, np: g.np, min: g.min, max: g.max }])) };
+  }
+  const invite = new URLSearchParams(location.search).get('room');
+  if (invite && /^\d{4,5}$/.test(invite) && invite !== code) {
+    history.replaceState(null, '', location.pathname);
+    code = null; store.set('code', '');
+    ui.invite = invite;
+    if (store.get('name', '')) return join(invite);
+  }
+  if (code && NET.mode === 'p2p' && store.get('hosting', '') === code && !(await hostResume())) code = null;
+  if (code) connect(code); else render();
+})();
 </script>
 </body>
 </html>

@@ -2,7 +2,11 @@
 
 Nepali games over Wi-Fi or a phone hotspot: Callbreak, Teen Patti, Kitti, Marriage, Baag Chal, Ludo. Empty seats can be filled with bots.
 
-## Run it
+## Play online (share with friends)
+Open **https://urjatechweb-cloud.github.io/khel-ghar/**, enter your name, pick a game and tap **Share invite link**. Friends open the link and join from anywhere.
+The room runs on the creator's phone (peer-to-peer via [PeerJS](https://peerjs.com)), so the creator keeps the app open while playing. If anyone refreshes, they rejoin automatically.
+
+## Play on Wi-Fi / hotspot without internet
 One device is the host. It needs Node.js 18 or newer, and nothing else to install.
 
 ```bash
