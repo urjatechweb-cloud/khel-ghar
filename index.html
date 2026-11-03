@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="ne">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#16040a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Khel Ghar</title>
+<style>
+:root{--bg:#16040a;--gold:#f5c542;--gold2:#b8860b;--crimson:#d01c3a;--crimson2:#8f0f26;--blue:#1446b8;--text:#fff7ea;--muted:#c9ae9c;--line:rgba(245,197,66,.22);--glass:rgba(255,255,255,.06);
+  --c0:#e23a3a;--c1:#22a052;--c2:#f2bf0f;--c3:#2563eb;--cw:58px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:15px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari",sans-serif;user-select:none;-webkit-user-select:none;overflow-x:hidden;
+  background-image:radial-gradient(ellipse at 50% -10%,#6b1226 0,transparent 60%),radial-gradient(ellipse at 50% 120%,#2b0b3a 0,transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M20 2 38 20 20 38 2 20Z' fill='none' stroke='%23f5c542' stroke-opacity='.05'/%3E%3C/svg%3E")}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input{font:inherit;color:var(--text);background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;outline:none}
+input:focus{border-color:var(--gold)}
+#app{max-width:760px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.btn{padding:12px 18px;border-radius:14px;font-weight:700;letter-spacing:.2px;background:linear-gradient(#e8334f,#a5112b);box-shadow:0 3px 0 #5c0718,0 6px 14px rgba(0,0,0,.35);transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #5c0718}
+.btn.gold{background:linear-gradient(#ffd966,#d99a0b);color:#3a1c00;box-shadow:0 3px 0 #7a5200,0 6px 14px rgba(0,0,0,.35)}
+.btn.blue{background:linear-gradient(#3b74e6,#123c9c);box-shadow:0 3px 0 #0a245e,0 6px 14px rgba(0,0,0,.35)}
+.btn.dark{background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px var(--line)}
+.btn:disabled{filter:grayscale(1);opacity:.45;pointer-events:none}
+.btn.wide{width:100%;padding:15px;font-size:17px}
+.pad{padding:16px}
+.muted{color:var(--muted)}.small{font-size:13px}.center{text-align:center}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(6px)}
+/* prayer flags */
+.flags{display:flex;justify-content:space-between;padding:0 6px;height:22px;position:relative}
+.flags:before{content:"";position:absolute;left:0;right:0;top:2px;height:1px;background:rgba(255,255,255,.35)}
+.flags i{width:14px;height:18px;margin-top:2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);transform-origin:top;animation:sway 3s ease-in-out infinite alternate}
+.flags i:nth-child(5n+1){background:#2563eb}.flags i:nth-child(5n+2){background:#f5f5f5}.flags i:nth-child(5n+3){background:#e23a3a}.flags i:nth-child(5n+4){background:#22a052}.flags i:nth-child(5n){background:#f2bf0f}
+.flags i:nth-child(odd){animation-delay:-1.5s}
+@keyframes sway{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+/* home */
+.hero{position:relative;text-align:center;padding:18px 16px 8px;overflow:hidden}
+.hero svg{position:absolute;left:0;right:0;bottom:0;width:100%;height:90px;opacity:.55}
+.hero h1{position:relative;font-size:46px;font-weight:900;background:linear-gradient(#fff3c4,#f5c542 55%,#c8860b);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #5c0718)}
+.hero p{position:relative;color:var(--muted);font-size:14px;margin-top:2px}
+.profile{display:flex;gap:12px;align-items:center;padding:12px;margin:12px 16px}
+.sec{margin:20px 16px 10px;font-weight:800;color:var(--gold);font-size:17px;display:flex;align-items:baseline;gap:8px}
+.sec span{color:var(--muted);font-weight:500;font-size:13px}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px}
+.tile{position:relative;height:150px;border-radius:20px;padding:14px;text-align:left;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.4),inset 0 0 0 1px rgba(255,255,255,.12);transition:transform .1s}
+.tile:active{transform:scale(.96)}
+.tile .art{position:absolute;right:-8px;bottom:-14px;font-size:84px;opacity:.9;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4));transform:rotate(-12deg)}
+.tile b{position:relative;display:block;font-size:24px;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.tile small{position:relative;display:block;opacity:.85;max-width:64%;font-size:12px}
+.tile:nth-child(odd):last-child{grid-column:span 2;height:118px}.tile:nth-child(odd):last-child small{max-width:70%}
+.tile em{position:absolute;left:14px;bottom:12px;font-style:normal;font-size:12px;background:rgba(0,0,0,.35);padding:3px 9px;border-radius:20px}
+.t-callbreak{background:linear-gradient(135deg,#1f6f43,#0b3b22)}.t-teenpatti{background:linear-gradient(135deg,#b3122e,#4e0614)}
+.t-kitti{background:linear-gradient(135deg,#6d28d9,#2e1065)}.t-baagchal{background:linear-gradient(135deg,#c2410c,#5a1d04)}
+.t-marriage{background:linear-gradient(135deg,#0f766e,#053b37)}.t-ludo{background:linear-gradient(135deg,#1d4ed8,#0b1f5c)}
+.joinrow{display:flex;gap:10px;margin:0 16px}
+.joinrow input{text-align:center;font-size:22px;letter-spacing:8px;font-weight:800}
+.addr{margin:22px 16px 30px;padding:12px;text-align:center;font-size:13px}
+.addr b{color:var(--gold);font-size:15px;display:block;margin-top:2px;word-break:break-all}
+/* avatars */
+.av{width:var(--a,44px);height:var(--a,44px);border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:calc(var(--a,44px)*.42);color:#fff;border:2px solid rgba(255,255,255,.85);box-shadow:0 3px 8px rgba(0,0,0,.5);position:relative;flex:none;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.av .bot{position:absolute;right:-5px;bottom:-4px;font-size:13px;line-height:1}
+.av .off{position:absolute;right:-3px;top:-3px;width:11px;height:11px;border-radius:50%;background:#888;border:2px solid #222}
+/* lobby */
+.bar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top))}
+.ib{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;font-size:18px;flex:none}
+.ttl{flex:1;min-width:0;font-weight:800;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.codebox{margin:6px 16px;padding:18px;text-align:center}
+.code{font-size:52px;font-weight:900;letter-spacing:12px;color:var(--gold);text-shadow:0 3px 0 #5c0718;padding-left:12px}
+.slots{margin:12px 16px;display:grid;gap:8px}
+.slotp{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--glass);border:1px solid var(--line);animation:pop .25s}
+.slotp.empty{border-style:dashed;color:var(--muted);background:none}
+.slotp .nm{flex:1;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slotp .nm small{display:block;font-weight:400;color:var(--muted)}
+.dot{width:44px;height:44px;border-radius:50%;border:2px dashed var(--line);flex:none}
+.rules{margin:12px 16px;padding:14px;font-size:14px;color:#ecdccd}
+.rules b{color:var(--gold)}
+.foot{position:sticky;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%);margin-top:auto}
+/* table */
+.game{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+.felt{position:relative;margin:4px 10px;border-radius:120px/90px;background:radial-gradient(ellipse at 50% 40%,#1c8a52 0,#0d5a33 55%,#073821 100%);
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,.06),inset 0 0 50px rgba(0,0,0,.55),0 0 0 9px #5a2a0c,0 0 0 11px #c8860b,0 14px 30px rgba(0,0,0,.6)}
+.felt.red{background:radial-gradient(ellipse at 50% 40%,#9b1830 0,#5e0c1c 60%,#3a0611 100%)}
+.felt-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:13px;color:rgba(255,255,255,.25);font-weight:800;letter-spacing:3px;text-align:center;pointer-events:none;white-space:nowrap}
+.seat{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;width:92px;z-index:3}
+.seat .nm{margin-top:3px;font-size:12px;font-weight:700;max-width:92px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,.55);padding:1px 8px;border-radius:10px}
+.seat .info{font-size:11px;color:#ffe7a8;background:rgba(0,0,0,.45);padding:1px 7px;border-radius:9px;margin-top:2px;white-space:nowrap}
+.seat.turn .av{box-shadow:0 0 0 3px var(--gold),0 0 22px 4px rgba(245,197,66,.8);animation:glow 1s ease-in-out infinite alternate}
+.seat.out{opacity:.45;filter:grayscale(.8)}
+@keyframes glow{to{box-shadow:0 0 0 3px var(--gold),0 0 8px 1px rgba(245,197,66,.5)}}
+.bubble{position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:#fff;color:#222;font-size:12px;font-weight:800;padding:2px 8px;border-radius:10px;white-space:nowrap;animation:pop .25s;z-index:4}
+.chipv{font-size:11px;font-weight:800;color:#ffe7a8}
+.dealer{position:absolute;right:4px;top:-4px;width:18px;height:18px;border-radius:50%;background:#fff;color:#a5112b;font-size:10px;font-weight:900;display:grid;place-items:center;border:2px solid var(--gold);z-index:2}
+.minis{display:flex;margin-top:-6px;z-index:-1}
+.minis .cd{--w:22px;margin-left:-12px;border-width:2px}.minis .cd:first-child{margin-left:0}
+.minis.face{margin-top:3px;z-index:auto}.minis.face .cd{--w:30px;margin-left:-6px;border-width:1px}
+.minis .cd.bk{--w:26px}
+/* cards */
+.cd{width:var(--w,var(--cw));height:calc(var(--w,var(--cw))*1.42);border-radius:calc(var(--w,var(--cw))*.13);background:linear-gradient(160deg,#fffefa,#f1e9d8);border:1px solid #cdbf9f;box-shadow:0 2px 5px rgba(0,0,0,.35);position:relative;color:#151515;flex:none;font-family:Georgia,"Times New Roman",serif}
+.cd .tl{position:absolute;top:calc(var(--w,var(--cw))*.05);left:calc(var(--w,var(--cw))*.08);font-weight:800;font-size:calc(var(--w,var(--cw))*.3);line-height:.9;text-align:center}
+.cd .tl i{display:block;font-style:normal;font-size:.75em}
+.cd .md{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--w,var(--cw))*.55);padding-top:18%}
+.cd.r{color:#c8102e}
+.cd.bk{background:radial-gradient(circle,#f5c542 0 9%,transparent 10%),radial-gradient(circle,transparent 0 22%,rgba(245,197,66,.6) 23% 25%,transparent 26%),repeating-linear-gradient(45deg,#a3122e 0 4px,#7a0c22 4px 8px);border:3px solid #fff4dc}
+.fan{display:flex;justify-content:center;padding:18px 8px 6px;min-height:calc(var(--cw)*1.42 + 26px)}
+.fan .cd{transition:transform .15s}
+.fan .cd.ok{transform:translateY(-12px);box-shadow:0 0 0 2px var(--gold),0 8px 14px rgba(0,0,0,.5);cursor:pointer}
+.fan .cd.no{filter:brightness(.6)}
+.fan .cd.ok:active{transform:translateY(-18px)}
+.tcard{position:absolute;transform:translate(-50%,-50%);z-index:2}
+.tcard .cd{--w:50px}
+.tcard.win .cd{box-shadow:0 0 0 3px var(--gold),0 0 16px var(--gold)}
+@keyframes fly{from{transform:translate(calc(-50% + var(--fx)),calc(-50% + var(--fy))) scale(.6) rotate(-25deg);opacity:.2}}
+.fly{animation:fly .38s cubic-bezier(.2,.9,.25,1)}
+@keyframes collect{to{transform:translate(calc(-50% + var(--cx)),calc(-50% + var(--cy))) scale(.35);opacity:0}}
+.collect{animation:collect .45s ease-in 1.15s forwards}
+.fly.collect{animation:fly .38s cubic-bezier(.2,.9,.25,1),collect .45s ease-in 1.15s forwards}
+.gone{visibility:hidden}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.pop{animation:pop .25s ease-out}
+@keyframes deal{from{transform:translateY(-55vh) rotate(-30deg) scale(.5);opacity:0}}
+.deal{animation:deal .45s cubic-bezier(.2,.9,.25,1) backwards}
+@keyframes flip{from{transform:rotateY(90deg)}}
+.flip{animation:flip .35s ease-out backwards}
+/* sheets */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;max-width:760px;margin:0 auto;background:linear-gradient(#3a0d18,#1d050b);border-top:2px solid var(--gold2);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.6);animation:up .3s cubic-bezier(.2,.9,.25,1)}
+@keyframes up{from{transform:translateY(100%)}}
+.sheet h3{text-align:center;color:var(--gold);font-size:20px;margin-bottom:12px}
+.bidbox{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);z-index:5;width:min(64%,300px);background:rgba(20,4,9,.88);border:2px solid var(--gold2);border-radius:20px;padding:12px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.bidbox b{color:var(--gold);display:block;margin-bottom:8px}.bidbox small{color:var(--muted);font-size:11px;display:block;margin-top:6px}
+.bidgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.bidgrid .btn{font-size:20px;padding:9px 0;border-radius:12px}
+.actions{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));margin-top:auto}
+.actions .btn{flex:1;padding:13px 4px;font-size:15px;line-height:1.1}
+.actions .btn small{display:block;font-size:11px;font-weight:600;opacity:.85}
+.hint{text-align:center;color:var(--gold);font-weight:700;padding:6px;font-size:14px;min-height:30px}
+.hint.me{animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{to{opacity:.55}}
+/* overlay result */
+.veil{position:fixed;inset:0;background:rgba(10,2,5,.72);z-index:30;display:grid;place-items:center;padding:16px;animation:fade .25s}
+@keyframes fade{from{opacity:0}}
+.dialog{width:100%;max-width:440px;background:linear-gradient(#3a0d18,#1d050b);border:2px solid var(--gold2);border-radius:22px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.7);animation:pop .3s cubic-bezier(.2,.9,.25,1.3);max-height:90vh;overflow:auto}
+.dialog h2{text-align:center;color:var(--gold);font-size:24px;margin-bottom:4px}
+.dialog .sub{text-align:center;color:var(--muted);margin-bottom:14px}
+.trophy{font-size:56px;text-align:center;animation:bounce .8s ease-in-out infinite alternate}
+@keyframes bounce{to{transform:translateY(-8px)}}
+.sc{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 14px}
+.sc th,.sc td{padding:7px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08)}
+.sc th{color:var(--muted);font-weight:600;font-size:12px}
+.sc tr.tot td{font-weight:900;color:var(--gold);font-size:16px;border:0}
+.neg{color:#ff7a7a}.pos{color:#7dffa8}
+.row2{display:flex;gap:10px}.row2 .btn{flex:1}
+#toast{position:fixed;left:50%;top:max(14px,env(safe-area-inset-top));transform:translate(-50%,-120%);background:#fff;color:#2a0710;font-weight:700;padding:10px 18px;border-radius:14px;transition:transform .25s;z-index:50;max-width:90vw;box-shadow:0 8px 20px rgba(0,0,0,.5);pointer-events:none}
+#toast.on{transform:translate(-50%,0)}
+/* kitti */
+.prow{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;padding:6px 10px 2px}
+.pchip{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:14px;background:var(--glass);border:1px solid var(--line);min-width:0}
+.pchip>div:last-child{min-width:0}
+.pchip .av{--a:28px}
+.pchip b{font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pchip small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pchip small{font-size:11px;color:var(--muted)}
+.pchip.turn{border-color:var(--gold);box-shadow:0 0 12px rgba(245,197,66,.5)}
+.kslots{display:grid;gap:10px;padding:8px 12px}
+.kslot{display:flex;align-items:center;gap:10px;padding:10px;border-radius:18px;background:rgba(0,0,0,.28);border:2px dashed rgba(255,255,255,.15);transition:border-color .2s,background .2s}
+.kslot.act{border:2px solid var(--gold);background:rgba(245,197,66,.08)}
+.kslot .lab{width:62px;font-size:12px;color:var(--muted);flex:none}
+.kslot .lab b{display:block;color:var(--text);font-size:14px}
+.kslot .lab em{display:block;font-style:normal;color:var(--gold);font-weight:700;font-size:12px;margin-top:2px}
+.kslot .cds{display:flex;gap:6px}
+.kslot .cd{--w:50px;cursor:pointer}
+.ph{width:50px;height:71px;border-radius:7px;border:2px dashed rgba(255,255,255,.18);flex:none}
+.kres{display:grid;gap:8px}
+.kline{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:12px}
+.kline.w{background:rgba(245,197,66,.14);box-shadow:inset 0 0 0 1px var(--gold)}
+.kline .av{--a:28px}.kline .nm{flex:1;min-width:0;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kline .nm small{display:block;font-weight:500;color:var(--muted)}
+.kline .cd{--w:30px}
+.ktitle{font-size:12px;color:var(--muted);margin:10px 0 2px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+/* marriage */
+.mtable{display:flex;justify-content:center;align-items:flex-end;gap:22px;padding:16px 10px 12px;margin:8px 10px;border-radius:26px;background:radial-gradient(ellipse at 50% 40%,#1c8a52 0,#0d5a33 60%,#073821 100%);box-shadow:inset 0 0 40px rgba(0,0,0,.5),0 0 0 6px #5a2a0c,0 0 0 8px #c8860b}
+.pile{display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}
+.pile .cd{--w:52px}
+.pile label{font-size:11px;color:#ffe7a8;font-weight:700}
+.pile .cnt{position:absolute;top:-8px;right:-10px;background:#fff;color:#2a0710;font-size:11px;font-weight:900;border-radius:10px;padding:1px 6px;z-index:2}
+.pile.go{cursor:pointer}.pile.go .cd{box-shadow:0 0 0 3px var(--gold),0 0 18px var(--gold);animation:bounce .6s ease-in-out infinite alternate}
+.pile .stack{position:relative}.pile .stack:before,.pile .stack:after{content:"";position:absolute;inset:0;border-radius:7px;background:#7a0c22;border:2px solid #fff4dc;transform:translate(3px,3px);z-index:-1}.pile .stack:after{transform:translate(6px,6px);z-index:-2}
+.mmelds{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:2px 8px}
+.mg{display:flex;padding:3px 3px 3px 10px;border-radius:9px;background:rgba(255,255,255,.08);border:1px solid var(--line)}
+.mg .cd{--w:30px;margin-left:-7px}
+.mhand{padding:16px 6px 8px;margin-top:auto}.mhand+.actions{margin-top:0}
+.mrow{display:flex;justify-content:center}
+.mrow+.mrow{margin-top:-26px}
+.mrow .cd{--w:54px;transition:transform .15s}
+.mrow .cd.tap{cursor:pointer}
+.mrow .cd.sel{transform:translateY(-16px);box-shadow:0 0 0 3px var(--gold),0 8px 14px rgba(0,0,0,.5);z-index:3}
+.mrow .cd.fresh{box-shadow:0 0 0 2px #7dffa8,0 0 12px #7dffa8}
+.mrow .cd.fin{box-shadow:0 0 0 2px var(--gold)}
+.bdg{position:absolute;right:2px;bottom:2px;font:800 9px/1.3 system-ui;color:#fff;background:#6d28d9;border-radius:6px;padding:0 4px}
+.bdg.mp{background:#b45309}
+/* baag chal */
+.bcwrap{padding:4px 12px}
+.bcstats{display:flex;justify-content:space-between;gap:10px;padding:6px 12px}
+.stat{flex:1;padding:8px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--line);text-align:center}
+.stat b{display:block;font-size:22px;color:var(--gold)}
+.stat small{color:var(--muted);font-size:12px}
+.stat.turn{border-color:var(--gold);box-shadow:0 0 14px rgba(245,197,66,.45)}
+svg.bc{width:100%;max-width:440px;display:block;margin:6px auto;filter:drop-shadow(0 12px 20px rgba(0,0,0,.6))}
+.bc .hit{fill:transparent;cursor:pointer}
+/* ludo */
+.ludo{display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);width:min(calc(100vw - 20px),520px,calc(100dvh - 250px));aspect-ratio:1;margin:6px auto;border-radius:14px;overflow:hidden;background:#fffaf0;box-shadow:0 0 0 5px #5a2a0c,0 0 0 7px #c8860b,0 14px 30px rgba(0,0,0,.6);position:relative}
+.lq{border-radius:6px;display:grid;place-items:center}
+.lq .inner{width:70%;height:70%;background:#fffaf0;border-radius:18%;box-shadow:inset 0 2px 8px rgba(0,0,0,.25)}
+.lc{border:.5px solid rgba(0,0,0,.14);display:grid;place-items:center;position:relative;color:rgba(0,0,0,.35);font-size:min(2.6vw,13px)}
+.spot{border-radius:50%;margin:12%;box-shadow:inset 0 2px 5px rgba(0,0,0,.35)}
+.lmid{background:conic-gradient(from 45deg,var(--c2) 0 25%,var(--c3) 0 50%,var(--c0) 0 75%,var(--c1) 0);display:grid;place-items:center}
+.lmid b{background:rgba(255,255,255,.9);color:#5a2a0c;border-radius:50%;width:46%;aspect-ratio:1;display:grid;place-items:center;font-size:min(3.2vw,15px)}
+.toks{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;z-index:2}
+.tk{width:72%;aspect-ratio:1;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 3px rgba(0,0,0,.55),inset 0 -3px 0 rgba(0,0,0,.25);position:relative;flex:none;transition:transform .12s}
+.tk:after{content:"";position:absolute;inset:26%;border-radius:50%;background:rgba(255,255,255,.55)}
+.toks.m .tk{width:48%;margin:-2%}
+.tk.k0{background:#c51f1f}.tk.k1{background:#168a3e}.tk.k2{background:#d9a400}.tk.k3{background:#1d4fd1}
+.tk.go{cursor:pointer;animation:hop .45s ease-in-out infinite alternate;border-color:#fff;box-shadow:0 0 0 2px #000,0 0 12px 3px #fff}
+@keyframes hop{to{transform:translateY(-22%) scale(1.12)}}
+.dicebar{display:flex;align-items:center;justify-content:center;gap:14px;padding:8px}
+.dicebar{padding:14px 8px}.dice{width:76px;height:76px;border-radius:16px;background:linear-gradient(145deg,#fff,#e7e2d6);box-shadow:0 5px 0 #a39b8a,0 8px 16px rgba(0,0,0,.5);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:10px;gap:2px;position:relative}
+.dice i{border-radius:50%;background:#222;margin:2px;visibility:hidden}
+.dice i.on{visibility:visible}
+.dice.go{cursor:pointer;animation:bounce .5s ease-in-out infinite alternate;box-shadow:0 5px 0 #a39b8a,0 0 0 4px var(--gold),0 0 22px var(--gold)}
+.dice.roll{animation:spin .5s linear}
+@keyframes spin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(200deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
+.dturn{display:flex;align-items:center;gap:8px;font-weight:700}
+.dturn .av{--a:38px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="layer"></div>
+<div id="toast"></div>
+<script src="/games.js"></script>
+<script>
+'use strict';
+const U = window.Games._util;
+const store = { get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+let pid = store.get('pid', '');
+if (!pid) { pid = Math.random().toString(36).slice(2) + Date.now().toString(36); store.set('pid', pid); }
+let code = store.get('code', '') || null, R = null, P = null, es = null, INFO = null;
+const ui = { seen: new Set(), kitti: null, bcSel: null, lp: null, anim: 0, animId: 0, diceUntil: 0, rolls: null, msel: null, mkey: null, mnew: null };
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const J = o => esc(JSON.stringify(o));
+const SUIT = { S: '♠', H: '♥', D: '♦', C: '♣' }, RN = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' };
+const eqc = (a, b) => a.r === b.r && a.s === b.s;
+const fresh = k => ui.seen.has(k) ? false : (ui.seen.add(k), true);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const GAME = {
+  callbreak: { art: '🂡', tag: 'Bid & win tricks' }, teenpatti: { art: '🃏', tag: 'Blind, chaal, show' },
+  kitti: { art: '🎴', tag: '9 cards, 3 hands' }, marriage: { art: '💍', tag: '21 cards · Maal' }, baagchal: { art: '🐯', tag: 'Tigers vs goats' }, ludo: { art: '🎲', tag: 'Race home' },
+};
+const RULES = {
+  callbreak: '<b>4 players · 5 rounds.</b> Bid how many hands (tricks) you will win. ♠ Spades are trump. Follow suit and beat the highest card if you can; with no card of that suit you must play a spade. Make your bid → +bid (+0.1 per extra hand). Miss it → −bid.',
+  teenpatti: '<b>3 cards each.</b> Blind players pay the stake, seen players pay double. <b>Chaal</b> to stay, <b>Raise</b> to double the stake, <b>Pack</b> to fold. With 2 left anyone can ask for <b>Show</b>. Trail › Pure sequence › Sequence › Color › Pair › High card.',
+  kitti: '<b>9 cards each.</b> Split them into 3 hands of 3 (Teen Patti ranking). Best vs best, middle vs middle, low vs low. Win most of the 3 to take the point. A tie is <b>Kitti</b> – the point carries over.',
+  marriage: '<b>3 decks · 21 cards each.</b> Each turn draw from the deck (or pick the top discard if it makes a set right away), then throw one card. Lay down <b>3 pure sequences or tunnelas</b> to <b>see the Maal</b>: the Tiplu is revealed, and every card of its rank plus Poplu/Jhiplu (same suit, one up/down) become wild jokers. Finish when your other 12 cards make 4 sets (sequence or trial). Maal points: Tiplu 3, Poplu/Jhiplu 2, Alter 5. Unseen players pay 10, seen players pay 3. <b>Dublee:</b> lay down 7 identical pairs instead to see the Maal; your 8th pair wins (+5 from each player). A dublee player may pick a thrown card only to make that 8th pair.',
+  baagchal: '<b>Nepal’s own game.</b> 4 tigers 🐯 vs 20 goats 🐐. Goats are placed one per turn, then moved. Tigers jump goats to capture. Tigers win at 5 captures; goats win by trapping every tiger. First player = goats.',
+  ludo: '<b>Roll 6</b> to bring a token out. Landing on a rival sends it home (except on ★ and start squares). A 6, a capture or reaching home gives another roll. Three 6s in a row lose the turn. Bring all 4 home to win.',
+};
+const AVC = ['#e63946', '#2a9d8f', '#d4a017', '#3a6fd8', '#9b5de5', '#f3722c', '#06a77d', '#ef476f'];
+
+// ---------- sound & haptics ----------
+let AC = null;
+function sfx(kind) {
+  if (store.get('mute', '0') === '1') return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    const t = AC.currentTime;
+    const tone = (f, d, st = 0, type = 'sine', v = 0.12) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t + st); g.gain.setValueAtTime(v, t + st); g.gain.exponentialRampToValueAtTime(0.0001, t + st + d); o.connect(g).connect(AC.destination); o.start(t + st); o.stop(t + st + d + 0.02); };
+    if (kind === 'card') { tone(1400, 0.04, 0, 'triangle', 0.08); tone(500, 0.06, 0.01, 'sine', 0.06); }
+    if (kind === 'turn') { tone(660, 0.12); tone(990, 0.2, 0.11); }
+    if (kind === 'chip') { tone(2200, 0.05, 0, 'square', 0.03); tone(1800, 0.06, 0.05, 'square', 0.03); }
+    if (kind === 'dice') for (let i = 0; i < 6; i++) tone(300 + Math.random() * 500, 0.04, i * 0.06, 'triangle', 0.07);
+    if (kind === 'step') tone(720, 0.05, 0, 'triangle', 0.06);
+    if (kind === 'cap') { tone(300, 0.18, 0, 'sawtooth', 0.06); tone(180, 0.25, 0.1, 'sawtooth', 0.05); }
+    if (kind === 'win') [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.3, i * 0.12, 'triangle', 0.1));
+  } catch {}
+}
+const buzz = ms => { try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms); } catch {} };
+function toggleMute() { store.set('mute', store.get('mute', '0') === '1' ? '0' : '1'); render(); }
+
+// ---------- networking ----------
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2400); }
+async function api(type, data = {}) {
+  try {
+    const r = await fetch('/api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, pid, code, ...data }) });
+    const j = await r.json();
+    if (j.error) { toast(j.error); buzz(80); }
+    return j;
+  } catch { toast('Connection lost – check the Wi-Fi'); return { error: 'net' }; }
+}
+const act = action => { if (AC && AC.state === 'suspended') AC.resume(); return api('act', { action }); };
+function connect(c) {
+  code = c; store.set('code', c);
+  if (es) es.close();
+  es = new EventSource(`/events?code=${encodeURIComponent(c)}&pid=${encodeURIComponent(pid)}`);
+  es.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if (d.gone) { leaveLocal(); toast('Room closed'); return; }
+    P = R; R = d;
+    if (!P || P.code !== R.code || !!P.state !== !!R.state) { ui.seen.clear(); ui.lp = null; ui.animId++; ui.kitti = null; ui.rolls = null; }
+    onUpdate(P, R);
+    render();
+  };
+}
+function leaveLocal() { ui.animId++; ui.lp = null; if (es) es.close(); es = null; R = P = null; code = null; store.set('code', ''); closeLayer(); render(); }
+function nameVal() { const n = ($('#name') ? $('#name').value : store.get('name', '')).trim(); if (n) store.set('name', n); return n; }
+async function create(game) {
+  const n = nameVal(); if (!n) { $('#name').focus(); return toast('पहिले नाम लेख्नुहोस् · Enter your name'); }
+  const j = await api('create', { name: n, game }); if (j.code) connect(j.code);
+}
+async function join() {
+  const n = nameVal(); if (!n) { $('#name').focus(); return toast('पहिले नाम लेख्नुहोस् · Enter your name'); }
+  const c = $('#jcode').value.trim();
+  if (!/^\d{4}$/.test(c)) return toast('Enter the 4-digit room code');
+  const j = await api('join', { name: n, code: c }); if (j.code) connect(j.code);
+}
+async function doLeave() { closeLayer(); if (es) es.close(); es = null; await api('leave'); leaveLocal(); }
+function askLeave() {
+  if (!R || !R.state) return doLeave();
+  dialog(`<h2>Leave game?</h2><p class="sub">A bot will take over your seat so others can finish.</p><div class="row2"><button class="btn dark" onclick="closeLayer()">Stay</button><button class="btn" onclick="doLeave()">Leave</button></div>`);
+}
+function askLobby() { dialog(`<h2>End this game?</h2><p class="sub">Everyone returns to the room lobby.</p><div class="row2"><button class="btn dark" onclick="closeLayer()">Cancel</button><button class="btn" onclick="closeLayer();api('lobby')">End game</button></div>`); }
+function dialog(html) { $('#layer').innerHTML = `<div class="veil" onclick="if(event.target===this)closeLayer()"><div class="dialog">${html}</div></div>`; }
+function closeLayer() { $('#layer').innerHTML = ''; }
+
+// ---------- turn / event effects ----------
+function myTurn(r) {
+  const s = r && r.state, me = r ? r.you : -1; if (!s || me < 0) return false;
+  switch (r.game) {
+    case 'callbreak': return (s.phase === 'bid' || s.phase === 'play') && s.turn === me;
+    case 'teenpatti': return s.phase === 'bet' && s.turn === me && !s.folded[me];
+    case 'kitti': return s.phase === 'arrange' && !s.mine;
+    case 'baagchal': return s.phase === 'play' && s.side === s.turn;
+    case 'ludo': return s.phase !== 'over' && s.turn === me;
+    case 'marriage': return s.phase === 'play' && s.turn === me;
+  }
+}
+const ended = r => r && r.state && ['end', 'over', 'roundEnd'].includes(r.state.phase);
+function onUpdate(p, r) {
+  if (!r.state) return;
+  if (myTurn(r) && !myTurn(p)) { setTimeout(() => sfx('turn'), 250); buzz(40); }
+  if (ended(r) && !ended(p)) setTimeout(() => sfx('win'), 300);
+  const a = p && p.state, s = r.state;
+  if (!a) return;
+  if (r.game === 'callbreak' && (s.trick.length !== a.trick.length || s.lastTrick !== a.lastTrick && s.lastTrick)) sfx('card');
+  if (r.game === 'teenpatti' && s.log.length > a.log.length) sfx('chip');
+  if (r.game === 'baagchal' && JSON.stringify(s.last) !== JSON.stringify(a.last)) sfx(s.last && s.last.cap !== null ? 'cap' : 'card');
+  if (r.game === 'ludo') ludoAnimate(a, s);
+  if (r.game === 'marriage' && JSON.stringify(s.last) !== JSON.stringify(a.last)) sfx('card');
+  if (r.game === 'marriage' && s.hand.length === a.hand.length + 1) { // remember the card just drawn
+    const left = a.hand.slice(); ui.mnew = s.hand.find(c => { const i = left.findIndex(x => eqc(x, c)); if (i < 0) return true; left.splice(i, 1); return false; }) || null;
+  }
+}
+
+// ---------- shared pieces ----------
+function avatar(i, size) {
+  const p = R.seats[i] || { name: '?' }, nm = p.name.replace(/ \(bot\)$/, '');
+  let h = 0; for (const ch of nm) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  return `<div class="av" style="background:${AVC[h % AVC.length]};${size ? '--a:' + size + 'px' : ''}">${esc([...nm][0] || '?').toUpperCase()}${p.bot ? '<span class="bot">🤖</span>' : ''}${!p.bot && !p.online ? '<span class="off"></span>' : ''}</div>`;
+}
+const nm = i => esc(R.seats[i] ? R.seats[i].name.replace(/ \(bot\)$/, '') : '?');
+const card = (c, cls = '', attrs = '', extra = '') => `<div class="cd ${c.s === 'H' || c.s === 'D' ? 'r' : ''} ${cls}" ${attrs}><div class="tl">${RN[c.r] || c.r}<i>${SUIT[c.s]}</i></div><div class="md">${SUIT[c.s]}</div>${extra}</div>`;
+const back = (cls = '') => `<div class="cd bk ${cls}"></div>`;
+function seatXY(i, n) { // me at bottom, others clockwise around an ellipse (percent of felt)
+  const rel = (i - Math.max(R.you, 0) + n) % n, th = (90 + rel * 360 / n) * Math.PI / 180;
+  return [Math.min(87, Math.max(13, 50 + 44 * Math.cos(th))), 50 + 41 * Math.sin(th)];
+}
+function feltSize(reserve) { // fill the screen above the hand / action bar
+  const W = Math.min(innerWidth, 760) - 20, ch = (innerWidth < 380 ? 52 : 60) * 1.42;
+  return [W, Math.round(Math.max(240, Math.min(innerHeight - reserve - ch, W * 1.5)))];
+}
+function fanCards(cards, opts = {}) {
+  const W = Math.min(innerWidth, 760) - 16, cw = innerWidth < 380 ? 52 : 60, n = cards.length;
+  const step = n > 1 ? Math.min(cw + 4, (W - cw) / (n - 1)) : 0;
+  document.documentElement.style.setProperty('--cw', cw + 'px');
+  return `<div class="fan">${cards.map((c, i) => {
+    const o = opts.cls ? opts.cls(c, i) : '';
+    const click = opts.click ? opts.click(c, i) : '';
+    return card(c, `${o} ${opts.deal ? 'deal' : ''}`, `style="margin-left:${i ? step - cw : 0}px;${opts.deal ? `animation-delay:${i * 45}ms` : ''}" ${click ? `onclick='${click}'` : ''}`);
+  }).join('')}</div>`;
+}
+function header() {
+  const g = INFO && INFO.games[R.game];
+  return `<div class="bar"><button class="ib" onclick="askLeave()" aria-label="Leave">‹</button><div class="ttl">${GAME[R.game].art} ${esc(g ? g.np : R.game)}<small>${esc(g ? g.name : '')} · Room ${R.code}</small></div>
+    <button class="ib" onclick="toggleMute()" aria-label="Sound">${store.get('mute', '0') === '1' ? '🔇' : '🔊'}</button>
+    ${R.host && R.state ? '<button class="ib" onclick="askLobby()" aria-label="End game">⏏</button>' : ''}</div>`;
+}
+const hint = (txt, me) => `<div class="hint ${me ? 'me' : ''}">${txt}</div>`;
+const waitTxt = i => `Waiting for ${nm(i)}…`;
+
+// ---------- screens ----------
+function render() {
+  const app = $('#app');
+  if (!R) return renderHome(app);
+  if (!R.state) return renderLobby(app);
+  app.innerHTML = `<div class="game">${header()}${VIEWS[R.game](R.state)}</div>`;
+}
+const flags = () => `<div class="flags">${'<i></i>'.repeat(Math.min(26, Math.floor(Math.min(innerWidth, 760) / 28)))}</div>`;
+function renderHome(app) {
+  const games = INFO ? Object.entries(INFO.games) : [];
+  const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const addr = local && INFO ? INFO.ips.map(ip => `http://${ip}:${INFO.port}`).join('<br>') : esc(location.origin);
+  const name = store.get('name', '');
+  app.innerHTML = `${flags()}<div class="hero"><svg viewBox="0 0 400 90" preserveAspectRatio="none"><defs><linearGradient id="m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#c9b6c8"/><stop offset="1" stop-color="#3b1030"/></linearGradient></defs><path d="M0 90 L40 52 L62 66 L110 18 L140 48 L170 30 L205 6 L240 44 L262 34 L300 60 L330 26 L370 58 L400 40 L400 90Z" fill="url(#m)"/><path d="M0 90 L60 64 L120 78 L190 58 L260 80 L330 62 L400 76 L400 90Z" fill="#16040a"/></svg>
+    <h1>खेल घर</h1><p>Khel Ghar · Nepali games on Wi-Fi & hotspot</p></div>
+  <div class="profile glass"><div class="av" style="background:${AVC[2]}">${esc([...(name || '?')][0]).toUpperCase()}</div><input id="name" maxlength="16" value="${esc(name)}" placeholder="तपाईंको नाम · Your name" oninput="this.previousElementSibling.textContent=([...this.value.trim()][0]||'?').toUpperCase()"></div>
+  <div class="sec">खेल छान्नुहोस्<span>Choose a game</span></div>
+  <div class="games">${games.map(([k, g]) => `<button class="tile t-${k}" onclick="create('${k}')"><span class="art">${GAME[k].art}</span><b>${esc(g.np)}</b><small>${esc(g.name)} · ${GAME[k].tag}</small><em>👥 ${g.min === g.max ? g.min : g.min + '–' + g.max}</em></button>`).join('')}</div>
+  <div class="sec">कोठामा जानुहोस्<span>Join a friend</span></div>
+  <div class="joinrow"><input id="jcode" inputmode="numeric" maxlength="4" placeholder="0000" onkeydown="if(event.key==='Enter')join()"><button class="btn blue" onclick="join()">Join</button></div>
+  <div class="addr glass">📶 Friends on the same Wi-Fi / hotspot open<b>${addr}</b></div>`;
+}
+function renderLobby(app) {
+  const G = INFO ? INFO.games[R.game] : { min: 2, max: 6, np: R.game, name: R.game };
+  const n = R.seats.length, ok = n >= G.min && n <= G.max;
+  let slots = R.seats.map((s, i) => `<div class="slotp">${avatar(i)}<div class="nm">${nm(i)}${i === R.you ? ' <span class="muted">(you)</span>' : ''}<small>${s.bot ? 'Computer player' : R.host && i === R.you || (!R.host && i === 0) ? 'Host' : s.online ? 'Ready' : 'Offline'}</small></div>${R.host && i !== R.you ? `<button class="ib" onclick="api('kick',{seat:${i}})" aria-label="Remove">✕</button>` : ''}</div>`).join('');
+  for (let i = n; i < G.max; i++) slots += `<div class="slotp empty"><div class="dot"></div><div class="nm" style="font-weight:500">Empty seat</div>${R.host ? `<button class="btn dark" style="padding:8px 12px" onclick="api('addBot')">+ Bot</button>` : ''}</div>`;
+  app.innerHTML = `${flags()}<div class="bar"><button class="ib" onclick="askLeave()">‹</button><div class="ttl">${GAME[R.game].art} ${esc(G.np)}<small>${esc(G.name)}</small></div></div>
+  <div class="codebox glass"><div class="muted small">ROOM CODE · कोठा नम्बर</div><div class="code">${R.code}</div><div class="muted small">Friends: open this app → Join → enter the code</div></div>
+  <div class="slots">${slots}</div>
+  ${R.you < 0 ? `<div class="pad"><button class="btn blue wide" onclick="api('join',{name:store.get('name','Player')})">Take a seat</button></div>` : ''}
+  <div class="rules glass">${RULES[R.game]}</div>
+  <div class="foot">${R.host ? `<button class="btn gold wide" ${ok ? '' : 'disabled'} onclick="api('start')">${ok ? 'खेल सुरु · Start game ▶' : `Need ${G.min === G.max ? G.min : G.min + '+'} players – add bots`}</button>` : '<p class="center muted">Waiting for the host to start…</p>'}</div>`;
+}
+
+// ---------- games ----------
+const VIEWS = {
+  callbreak(s) {
+    const me = R.you, mine = myTurn(R), [W, H] = feltSize(150);
+    const showing = s.trick.length ? s.trick : s.lastTrick ? s.lastTrick.cards : [];
+    let h = `<div class="felt" style="height:${H}px">${showing.length || s.phase === 'bid' ? '' : `<div class="felt-mark">ROUND ${s.round}/${s.rounds}<br>♠ TRUMP</div>`}`;
+    const pos = R.seats.map((_, i) => seatXY(i, 4));
+    R.seats.forEach((_, i) => {
+      const [x, y] = pos[i], turn = (s.phase === 'bid' || s.phase === 'play') && s.turn === i;
+      h += `<div class="seat ${turn ? 'turn' : ''}" style="left:${x}%;top:${y}%">${avatar(i)}${s.bids[i] !== null && s.phase === 'bid' ? `<div class="bubble">Bid ${s.bids[i]}</div>` : ''}${i === s.dealer ? '<div class="dealer">D</div>' : ''}
+        <div class="nm">${nm(i)}</div><div class="info">${s.bids[i] === null ? '–' : `${s.tricks[i]}/${s.bids[i]}`} · ${s.totals[i]}</div></div>`;
+    });
+    const done = !s.trick.length && s.lastTrick, ck = `c${s.round}-${s.tricks.join('')}`, collecting = done && s.phase === 'play' && fresh(ck);
+    showing.forEach(t => {
+      const [sx, sy] = pos[t.seat], tx = 50 + (sx - 50) * 0.36, ty = 50 + (sy - 50) * 0.36;
+      const k = `p${s.round}-${t.card.r}${t.card.s}`, isNew = fresh(k);
+      let cls = isNew ? 'fly' : '', vars = `--fx:${(sx - tx) * W / 100}px;--fy:${(sy - ty) * H / 100}px;`;
+      if (done && s.phase === 'play') {
+        const [wx, wy] = pos[s.lastTrick.winner];
+        vars += `--cx:${(wx - tx) * W / 100}px;--cy:${(wy - ty) * H / 100}px;`;
+        cls += collecting ? ' collect' : ' gone';
+      }
+      h += `<div class="tcard ${cls} ${done && t.seat === s.lastTrick.winner ? 'win' : ''}" style="left:${tx}%;top:${ty}%;${vars}">${card(t.card)}</div>`;
+    });
+    if (s.phase === 'bid' && mine) h += `<div class="bidbox pop"><b>कति हात? · Your bid</b><div class="bidgrid">${[1, 2, 3, 4, 5, 6, 7, 8].map(v => `<button class="btn ${v === suggestBid(s.hand) ? 'gold' : 'dark'}" onclick='act({type:"bid",v:${v}})'>${v}</button>`).join('')}</div><small>Gold = suggested</small></div>`;
+    h += '</div>';
+    const legal = s.legal || [];
+    h += s.phase === 'play' ? hint(mine ? 'तपाईंको पालो · Your turn – tap a card' : done && collecting ? `${nm(s.lastTrick.winner)} wins the hand` : waitTxt(s.turn), mine)
+      : s.phase === 'bid' ? hint(mine ? 'Choose your bid' : `${nm(s.turn)} is bidding…`, mine) : hint('');
+    if (me >= 0) h += fanCards(s.hand, {
+      deal: fresh('deal' + s.round + '-' + s.history.length) && s.phase === 'bid',
+      cls: c => s.phase === 'play' && mine ? (legal.some(l => eqc(l, c)) ? 'ok' : 'no') : '',
+      click: c => s.phase === 'play' && mine && legal.some(l => eqc(l, c)) ? `act(${JSON.stringify({ type: 'play', card: c })})` : '',
+    });
+    if (s.phase === 'roundEnd' || s.phase === 'over') {
+      const best = Math.max(...s.totals), over = s.phase === 'over';
+      h += `<div class="veil"><div class="dialog">${over ? '<div class="trophy">🏆</div>' : ''}<h2>${over ? s.totals.map((t, i) => t === best ? nm(i) : null).filter(Boolean).join(' & ') + ' wins!' : `Round ${s.round} result`}</h2>
+        <table class="sc"><tr><th></th>${R.seats.map((_, i) => `<th>${nm(i)}</th>`).join('')}</tr>
+        ${s.history.map((r, k) => `<tr><td class="muted">R${k + 1}</td>${r.map(v => `<td class="${v < 0 ? 'neg' : 'pos'}">${v}</td>`).join('')}</tr>`).join('')}
+        <tr class="tot"><td>Σ</td>${s.totals.map(v => `<td>${v}</td>`).join('')}</tr></table>
+        <button class="btn gold wide" onclick='act({type:"next"})'>${over ? 'New game' : 'Next round ▶'}</button></div></div>`;
+    }
+    return h;
+  },
+
+  teenpatti(s) {
+    const me = R.you, mine = myTurn(R), n = R.seats.length, [, H] = feltSize(R.you >= 0 ? 225 : 90);
+    const lastAct = {}; s.log.forEach(l => { lastAct[l.seat] = l; });
+    const shown = s.result ? Object.fromEntries(s.result.shown.map(x => [x.seat, x])) : {};
+    const word = { chaal: 'Chaal', raise: 'Raise', pack: 'Packed', show: 'Show!' };
+    let h = `<div class="felt red" style="height:${H}px"><div class="felt-mark" style="color:#fff;opacity:1;letter-spacing:0"><div style="font-size:26px">🪙 ${s.pot}</div><div class="small" style="color:#ffd9a0">Blind ${s.stake} · Seen ${s.stake * 2}</div></div>`;
+    R.seats.forEach((_, i) => {
+      const [x, y] = seatXY(i, n), la = lastAct[i];
+      const face = shown[i] ? `<div class="minis face">${shown[i].hand.map((c, k) => card(c, fresh(`tpf${s.dealer}-${i}-${k}-${s.chips.join()}`) ? 'flip' : '')).join('')}</div>` : i === me ? '' : `<div class="minis">${back()}${back()}${back()}</div>`;
+      h += `<div class="seat ${s.phase === 'bet' && s.turn === i || s.result && s.result.winners.includes(i) ? 'turn' : ''} ${s.folded[i] ? 'out' : ''}" style="left:${x}%;top:${y}%">${la && s.phase === 'bet' ? `<div class="bubble">${word[la.t]}${la.c ? ' ' + la.c : ''}</div>` : ''}${avatar(i)}${i === s.dealer ? '<div class="dealer">D</div>' : ''}
+        <div class="nm">${nm(i)}</div><div class="info">🪙 ${s.chips[i]} · ${s.folded[i] ? 'Packed' : s.seen[i] ? 'Seen' : 'Blind'}</div>${face}${shown[i] ? `<div class="info" style="color:var(--gold)">${shown[i].name}</div>` : ''}</div>`;
+    });
+    h += '</div>';
+    if (me >= 0 && s.phase === 'bet') {
+      const deal = fresh(`tpd${s.dealer}-${s.chips.join()}`) && s.phase === 'bet';
+      h += hint(s.phase !== 'bet' ? '' : s.folded[me] ? 'You packed – watch the round' : mine ? 'तपाईंको पालो · Your turn' : waitTxt(s.turn), mine);
+      h += `<div class="fan" style="gap:8px">${s.hand ? s.hand.map((c, k) => card(c, fresh(`tps${s.dealer}-${s.chips.join()}-${k}`) ? 'flip' : '', `style="animation-delay:${k * 80}ms"`)).join('') : [0, 1, 2].map(k => back(deal ? 'deal' : '').replace('class', `style="animation-delay:${k * 90}ms" class`)).join('')}</div>`;
+      if (s.handName) h += `<div class="center" style="color:var(--gold);font-weight:800">${s.handName}</div>`;
+      if (s.phase === 'bet' && !s.folded[me]) {
+        h += `<div class="actions">${!s.seen[me] ? `<button class="btn blue" onclick='act({type:"see"})'>👁 See<small>cards</small></button>` : ''}
+          <button class="btn dark" ${mine ? '' : 'disabled'} onclick='act({type:"pack"})'>Pack<small>fold</small></button>
+          <button class="btn" ${mine ? '' : 'disabled'} onclick='act({type:"chaal"})'>${s.seen[me] ? 'Chaal' : 'Blind'}<small>🪙 ${s.cost}</small></button>
+          <button class="btn" ${mine && s.stake < s.maxStake ? '' : 'disabled'} onclick='act({type:"raise"})'>Raise<small>🪙 ${s.cost * 2}</small></button>
+          ${s.active === 2 ? `<button class="btn gold" ${mine ? '' : 'disabled'} onclick='act({type:"show"})'>Show<small>🪙 ${s.cost}</small></button>` : ''}</div>`;
+      }
+    }
+    if (s.phase === 'end') {
+      const r = s.result;
+      h += `<div class="sheet"><h3>🏆 ${r.winners.map(nm).join(' & ')} won 🪙 ${r.pot}</h3><p class="center muted" style="margin-bottom:12px">${r.shown.length ? 'Cards are shown on the table' : 'Everyone else packed'}</p><button class="btn gold wide" onclick='act({type:"next"})'>Next round ▶</button></div>`;
+    }
+    return h;
+  },
+
+  kitti(s) {
+    const me = R.you;
+    let h = `<div class="prow">${R.seats.map((_, i) => `<div class="pchip">${avatar(i)}<div><b>${nm(i)}</b><small>⭐ ${s.points[i]} · ${s.phase === 'arrange' ? (s.submitted[i] ? '✔' : '⏳') : '🏅 ' + s.result.wins[i]}</small></div></div>`).join('')}</div>`;
+    if (s.carry) h += `<div class="center small" style="color:var(--gold);margin-top:4px">Kitti pot: next winner gets ${1 + s.carry} ⭐</div>`;
+    if (s.phase === 'end') {
+      const r = s.result;
+      h += `<div class="pad"><div class="kres">${['1st hand · best', '2nd hand · middle', '3rd hand · low'].map((lab, k) => `<div class="glass" style="padding:8px 10px"><div class="ktitle">${lab}${r.slots[k] === null ? ' · tie' : ''}</div>` +
+        s.all.map((g, i) => `<div class="kline ${r.slots[k] === i ? 'w' : ''}">${avatar(i)}<div class="nm">${nm(i)}<small>${r.names[i][k]}</small></div>${g[k].map(c => card(c)).join('')}</div>`).join('') + '</div>').join('')}</div></div>`;
+      h += `<div class="foot"><div class="center" style="color:var(--gold);font-weight:900;font-size:20px;margin-bottom:10px">${r.winner === null ? '🤝 Kitti! Tie – point carries over' : '🏆 ' + nm(r.winner) + ' wins'}</div><button class="btn gold wide" onclick='act({type:"next"})'>Next round ▶</button></div>`;
+      return h;
+    }
+    if (me < 0) return h;
+    if (s.mine) return h + hint('Submitted ✔ waiting for others…') + `<div class="kslots">${s.mine.map((g, k) => `<div class="kslot"><div class="lab"><b>Hand ${k + 1}</b><em>${U.handName(g)}</em></div><div class="cds">${g.map(c => card(c)).join('')}</div></div>`).join('')}</div>`;
+    const key = JSON.stringify(s.hand);
+    if (!ui.kitti || ui.kitti.key !== key) ui.kitti = { key, slots: [[], [], []], active: 0 };
+    const K = ui.kitti, used = K.slots.flat(), free = s.hand.filter(c => !used.some(u => eqc(u, c)));
+    h += hint('Tap cards to fill the gold row', true);
+    h += `<div class="kslots">${K.slots.map((g, k) => `<div class="kslot ${K.active === k ? 'act' : ''}" onclick="kSlot(${k})"><div class="lab"><b>Hand ${k + 1}</b>${g.length === 3 ? `<em>${U.handName(g)}</em>` : `<span>${g.length}/3</span>`}</div><div class="cds">${g.map(c => card(c, 'pop', `onclick='event.stopPropagation();kBack(${k},${JSON.stringify(c)})'`)).join('')}${'<div class="ph"></div>'.repeat(3 - g.length)}</div></div>`).join('')}</div>`;
+    h += fanCards(free, { deal: fresh('kd' + key), cls: () => 'ok', click: c => `kPut(${JSON.stringify(c)})` });
+    h += `<div class="actions"><button class="btn dark" onclick="kClear()">Clear</button><button class="btn blue" onclick="kAuto()">✨ Auto</button><button class="btn gold" ${used.length === 9 ? '' : 'disabled'} onclick="kSubmit()">Submit ✔</button></div>`;
+    return h;
+  },
+
+  marriage(s) {
+    const me = R.you, mine = myTurn(R), tip = s.tiplu, myMelds = me >= 0 ? s.melds[me] : [];
+    const wild = tip && me >= 0 && s.seen[me] ? U.mWildOf(tip) : null;
+    const key = JSON.stringify(s.hand);
+    if (ui.mkey !== key) { ui.mkey = key; ui.msel = null; }
+    let h = `<div class="prow">${R.seats.map((_, i) => `<div class="pchip ${s.phase === 'play' && s.turn === i ? 'turn' : ''}">${avatar(i)}<div><b>${nm(i)}</b><small>${s.dublee[i] ? '👯 ' : s.seen[i] ? '👁 ' : ''}🂠 ${s.counts[i]}</small></div></div>`).join('')}</div>`;
+    const canDraw = mine && s.step === 'draw';
+    h += `<div class="mtable">
+      <div class="pile ${canDraw ? 'go' : ''}" ${canDraw ? `onclick='act({type:"draw",from:"stock"})'` : ''}><span class="cnt">${s.stockCount}</span><div class="stack">${back()}</div><label>${canDraw ? 'Tap to draw' : 'Deck'}</label></div>
+      <div class="pile ${s.canTake ? 'go' : ''}" ${s.canTake ? `onclick='act({type:"draw",from:"discard"})'` : ''}>${s.top ? card(s.top, fresh('mt' + s.round + JSON.stringify(s.last)) ? 'pop' : '') : '<div class="ph"></div>'}<label>${s.canTake ? 'Tap to pick' : 'Thrown'}</label></div>
+      <div class="pile">${tip ? card(tip, 'flip') : back()}<label>${tip ? 'Tiplu (Maal)' : 'Maal ?'}</label></div></div>`;
+    const fin = s.finishWith || [], sel = ui.msel !== null ? s.hand[ui.msel] : null;
+    const canFin = sel && fin.some(c => eqc(c, sel));
+    h += hint(s.phase !== 'play' ? '' : !mine ? waitTxt(s.turn) : s.step === 'draw' ? 'तपाईंको पालो · Draw from the deck' + (s.canTake ? ' or pick the thrown card' : '')
+      : fin.length ? '🎉 You can finish! Select the gold card and tap Finish' : s.canSee || s.canSeeDublee ? 'You can see the Maal! Tap the blue button' : me >= 0 && s.dublee[me] ? 'Dublee: you need one more identical pair' : 'Select a card to throw', mine);
+    if (myMelds.length) h += `<div class="mmelds">${myMelds.map(g => `<div class="mg">${g.map(c => card(c)).join('')}</div>`).join('')}</div>`;
+    if (me >= 0) {
+      const W = Math.min(innerWidth, 760) - 12, cw = 54, half = Math.ceil(s.hand.length / 2);
+      const freshIdx = ui.mnew ? s.hand.findIndex(c => eqc(c, ui.mnew)) : -1;
+      const row = (cards, off) => {
+        const step = cards.length > 1 ? Math.min(cw + 3, (W - cw) / (cards.length - 1)) : 0;
+        return `<div class="mrow">${cards.map((c, k) => {
+          const i = off + k, isW = wild && wild(c), mp = tip && me >= 0 && s.seen[me] ? U.mMaal([c], tip) : 0;
+          const cls = [mine && s.step === 'discard' ? 'tap' : '', ui.msel === i ? 'sel' : '', i === freshIdx && mine && s.step === 'discard' ? 'fresh' : '', fin.some(f => eqc(f, c)) ? 'fin' : ''].join(' ');
+          return card(c, cls, `style="margin-left:${k ? step - cw : 0}px" ${mine && s.step === 'discard' ? `onclick="mSel(${i})"` : ''}`,
+            (mp ? `<span class="bdg mp">+${mp}</span>` : isW ? '<span class="bdg">J</span>' : ''));
+        }).join('')}</div>`;
+      };
+      h += `<div class="mhand">${row(s.hand.slice(0, half), 0)}${row(s.hand.slice(half), half)}</div>`;
+      if (mine && s.step === 'discard') h += `<div class="actions">${s.canSee ? `<button class="btn blue" onclick='act({type:"see"})'>👁 See Maal<small>3 sequences</small></button>` : ''}${s.canSeeDublee ? `<button class="btn blue" onclick='act({type:"see",mode:"dublee"})'>👯 Dublee<small>show 7 pairs</small></button>` : ''}
+        <button class="btn" ${sel ? '' : 'disabled'} onclick="mThrow()">Throw<small>${sel ? (RN[sel.r] || sel.r) + SUIT[sel.s] : 'select a card'}</small></button>
+        ${s.seen[me] ? `<button class="btn gold" ${canFin ? '' : 'disabled'} onclick="mFinish()">Finish 🏁<small>${fin.length ? 'win the round' : 'not yet'}</small></button>` : ''}</div>`;
+    }
+    if (s.phase === 'end') {
+      const r = s.result, w = r.winner;
+      h += `<div class="veil"><div class="dialog"><div class="trophy">💍</div><h2>${nm(w)} finished${r.dublee ? ' with Dublee!' : '!'}</h2><p class="sub">Tiplu was ${RN[r.tiplu.r] || r.tiplu.r}${SUIT[r.tiplu.s]}${r.dublee ? ' · +5 dublee bonus from each player' : ''}</p>
+        <div class="mmelds" style="margin-bottom:10px">${r.groups.map(g => `<div class="mg">${g.map(c => card(c)).join('')}</div>`).join('')}</div>
+        <table class="sc"><tr><th></th><th>Seen</th><th>Maal</th><th>Round</th><th>Total</th></tr>
+        ${R.seats.map((_, i) => `<tr><td style="text-align:left">${i === w ? '🏆 ' : ''}${nm(i)}</td><td>${s.dublee[i] ? '👯' : s.seen[i] ? '👁' : '–'}</td><td>${r.maal[i]}</td><td class="${r.scores[i] < 0 ? 'neg' : 'pos'}">${r.scores[i] > 0 ? '+' : ''}${r.scores[i]}</td><td><b>${s.totals[i]}</b></td></tr>`).join('')}</table>
+        <button class="btn gold wide" onclick='act({type:"next"})'>Next round ▶</button></div></div>`;
+    }
+    return h;
+  },
+
+  baagchal(s) {
+    const mine = myTurn(R), goatTurn = s.turn === 'G';
+    let h = `<div class="bcstats"><div class="stat ${s.phase === 'play' && goatTurn ? 'turn' : ''}"><div class="row2" style="align-items:center;justify-content:center;gap:6px">${avatar(0, 26)}<span class="small">${nm(0)}</span></div><b>🐐 ${20 - s.placed}</b><small>goats to place</small></div>
+      <div class="stat ${s.phase === 'play' && !goatTurn ? 'turn' : ''}"><div class="row2" style="align-items:center;justify-content:center;gap:6px">${avatar(1, 26)}<span class="small">${nm(1)}</span></div><b>🐯 ${s.captured}<span style="font-size:14px;color:var(--muted)"> / 5</span></b><small>goats captured</small></div></div>`;
+    h += hint(s.phase === 'over' ? '' : mine ? (goatTurn ? (s.placed < 20 ? 'Your turn – tap a green spot to place a goat' : 'Your turn – tap a goat, then a green spot') : 'Your turn – tap a tiger, then a green spot') : waitTxt(goatTurn ? 0 : 1), mine);
+    const P = i => [60 + (i % 5) * 70, 60 + Math.floor(i / 5) * 70];
+    const moves = mine ? s.moves : [];
+    if (ui.bcSel !== null && !moves.some(m => m.from === ui.bcSel)) ui.bcSel = null;
+    const placing = goatTurn && s.placed < 20;
+    const targets = new Set(moves.filter(m => m.from === (placing ? null : ui.bcSel)).map(m => m.to));
+    const movable = new Set(placing ? [] : moves.map(m => m.from));
+    const L = (a, b) => { const [x1, y1] = P(a), [x2, y2] = P(b); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`; };
+    let lines = '';
+    for (let k = 0; k < 5; k++) lines += L(k * 5, k * 5 + 4) + L(k, 20 + k);
+    lines += L(0, 24) + L(4, 20) + L(2, 10) + L(10, 22) + L(22, 14) + L(14, 2);
+    const mk = `m${s.placed}-${s.captured}-${JSON.stringify(s.last)}`, animate = s.last && fresh(mk);
+    let pts = '', pieces = '';
+    s.board.forEach((p, i) => {
+      const [x, y] = P(i);
+      pts += `<circle cx="${x}" cy="${y}" r="7" fill="#5a2a0c"/>`;
+      if (targets.has(i)) pts += `<circle cx="${x}" cy="${y}" r="18" fill="rgba(34,160,82,.55)" stroke="#22a052" stroke-width="3"><animate attributeName="r" values="14;20;14" dur="1.2s" repeatCount="indefinite"/></circle>`;
+      if (!p) return;
+      const sel = ui.bcSel === i, can = movable.has(i);
+      let anim = '';
+      if (animate && s.last.to === i) anim = s.last.from === null ? '<animateTransform attributeName="transform" type="scale" from="0" to="1" dur=".3s"/>'
+        : `<animateTransform attributeName="transform" type="translate" from="${P(s.last.from)[0] - x} ${P(s.last.from)[1] - y}" to="0 0" dur=".35s" calcMode="spline" keySplines=".2 .9 .25 1" keyTimes="0;1"/>`;
+      pieces += `<g transform="translate(${x} ${y})"><g>${anim}<circle r="25" fill="${p === 'T' ? 'url(#tg)' : 'url(#gt)'}" stroke="${sel ? '#d01c3a' : can ? '#f5c542' : '#3a1a06'}" stroke-width="${sel || can ? 4 : 2}"/><text font-size="30" text-anchor="middle" dominant-baseline="central" y="2">${p === 'T' ? '🐯' : '🐐'}</text></g></g>`;
+    });
+    if (animate && s.last.cap !== null) { const [x, y] = P(s.last.cap); pieces += `<g transform="translate(${x} ${y})" opacity="0"><animate attributeName="opacity" from="1" to="0" dur=".6s"/><circle r="25" fill="url(#gt)"/><text font-size="30" text-anchor="middle" dominant-baseline="central" y="2">🐐</text></g>`; }
+    let hits = '';
+    s.board.forEach((_, i) => { const [x, y] = P(i); hits += `<circle class="hit" cx="${x}" cy="${y}" r="34" onclick="bcClick(${i})"/>`; });
+    h += `<div class="bcwrap"><svg class="bc" viewBox="0 0 400 400"><defs><radialGradient id="wd" cx=".5" cy=".4"><stop offset="0" stop-color="#f1d49a"/><stop offset="1" stop-color="#c9964f"/></radialGradient>
+      <radialGradient id="tg" cx=".4" cy=".35"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#c25b00"/></radialGradient><radialGradient id="gt" cx=".4" cy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#cfc6b4"/></radialGradient></defs>
+      <rect x="4" y="4" width="392" height="392" rx="26" fill="url(#wd)" stroke="#5a2a0c" stroke-width="8"/><g stroke="#6b3a12" stroke-width="4" stroke-linecap="round">${lines}</g>${pts}${pieces}${hits}</svg></div>`;
+    if (s.phase === 'over') h += `<div class="veil"><div class="dialog"><div class="trophy">${s.winner === 'T' ? '🐯' : s.winner === 'G' ? '🐐' : '🤝'}</div><h2>${s.winner === 'draw' ? 'Draw' : s.winner === 'T' ? 'Tigers win!' : 'Goats win!'}</h2><p class="sub">${s.winner === 'draw' ? 'The same position repeated 3 times' : s.winner === 'T' ? '5 goats captured' : 'All tigers are trapped'}</p><button class="btn gold wide" onclick='act({type:"next"})'>Play again</button></div></div>`;
+    return h;
+  },
+
+  ludo(s) {
+    const me = R.you, CN = ['Red', 'Green', 'Yellow', 'Blue'];
+    if (!ui.lp) ui.lp = s.pos.map(p => p.slice());
+    const busy = ui.anim > 0 || Date.now() < ui.diceUntil, mine = myTurn(R) && !busy;
+    let h = `<div class="prow">${R.seats.map((_, i) => `<div class="pchip ${s.phase !== 'over' && s.turn === i ? 'turn' : ''}" style="border-left:4px solid var(--c${s.colors[i]})">${avatar(i)}<div><b>${nm(i)}</b><small>🏠 ${s.pos[i].filter(p => p === 56).length}/4</small></div></div>`).join('')}</div>`;
+    let b = '';
+    const Q = [[1, 1], [1, 10], [10, 10], [10, 1]];
+    Q.forEach(([r, c], k) => { b += `<div class="lq" style="grid-area:${r}/${c}/span 6/span 6;background:var(--c${k})"><div class="inner"></div></div>`; });
+    LBASE.forEach((spots, k) => spots.forEach(([r, c]) => { b += `<div class="spot" style="grid-area:${r + 1}/${c + 1};background:var(--c${k});opacity:.35"></div>`; }));
+    LTRACK.forEach(([r, c], i) => {
+      const st = LSTART.indexOf(i);
+      b += `<div class="lc" style="grid-area:${r + 1}/${c + 1};${st >= 0 ? `background:var(--c${st})` : ''}">${LSAFE_IDX.includes(i) && st < 0 ? '★' : st >= 0 ? '<span style="color:#fff">★</span>' : ''}</div>`;
+    });
+    LHOME.forEach((cells, k) => cells.forEach(([r, c]) => { b += `<div class="lc" style="grid-area:${r + 1}/${c + 1};background:var(--c${k})"></div>`; }));
+    b += `<div class="lmid" style="grid-area:7/7/span 3/span 3"><b>घर</b></div>`;
+    const cells = {};
+    ui.lp.forEach((ps, seat) => ps.forEach((p, t) => { const [r, c] = ludoXY(s.colors[seat], p, t); (cells[r + ',' + c] = cells[r + ',' + c] || []).push({ seat, t, go: mine && s.phase === 'move' && seat === me && s.moves.includes(t) }); }));
+    for (const [rc, toks] of Object.entries(cells)) {
+      const [r, c] = rc.split(',').map(Number), home = r === 7 && c === 7;
+      b += `<div class="toks ${toks.length > 1 || home ? 'm' : ''}" style="position:relative;grid-area:${home ? '7/7/span 3/span 3' : `${r + 1}/${c + 1}`}">${toks.map(k => `<div class="tk k${s.colors[k.seat]} ${k.go ? 'go' : ''}" ${k.go ? `onclick='act({type:"move",t:${k.t}})'` : ''}></div>`).join('')}</div>`;
+    }
+    h += `<div class="ludo">${b}</div>`;
+    const rolling = Date.now() < ui.diceUntil, val = rolling ? 1 + Math.floor(Math.random() * 6) : s.dice || 6;
+    const canRoll = mine && s.phase === 'roll';
+    h += `<div class="dicebar"><div class="dturn">${avatar(s.turn)}<div>${nm(s.turn)}<div class="small" style="color:var(--c${s.colors[s.turn]})">${CN[s.colors[s.turn]]}</div></div></div>
+      <div class="dice ${rolling ? 'roll' : ''} ${canRoll ? 'go' : ''}" ${canRoll ? `onclick='act({type:"roll"})'` : ''}>${PIPS.map((_, k) => `<i class="${PIPS[val - 1].includes(k) ? 'on' : ''}"></i>`).join('')}</div></div>`;
+    h += hint(s.phase === 'over' ? '' : s.msg && !busy ? esc(s.msg) : mine ? (s.phase === 'roll' ? 'तपाईंको पालो · Tap the dice' : 'Tap a hopping token') : busy ? '' : waitTxt(s.turn), mine);
+    if (s.phase === 'over' && !busy) h += `<div class="veil"><div class="dialog"><div class="trophy">🏆</div><h2>${nm(s.winner)} wins!</h2><p class="sub">All four tokens reached home</p><button class="btn gold wide" onclick='act({type:"next"})'>Play again</button></div></div>`;
+    return h;
+  },
+};
+
+function suggestBid(hand) { // mirrors the bot's estimate so the gold button is a sensible default
+  let b = 0;
+  for (const st of ['S', 'H', 'D', 'C']) {
+    const cs = hand.filter(c => c.s === st), len = cs.length, has = r => cs.some(c => c.r === r);
+    if (st === 'S') { b += (has(14) ? 1 : 0) + (has(13) && len >= 2 ? 0.8 : 0) + (has(12) && len >= 3 ? 0.5 : 0) + Math.max(0, len - 3) * 0.7; continue; }
+    if (has(14)) b += len <= 5 ? 1 : 0.6;
+    if (has(13) && len >= 2 && len <= 4) b += 0.6;
+    if (len <= 1 && hand.filter(c => c.s === 'S').length >= 3) b += 0.5;
+  }
+  return Math.max(1, Math.min(8, Math.round(b)));
+}
+
+// --- Kitti arranging
+function kSlot(k) { ui.kitti.active = k; render(); }
+function kPut(c) {
+  const K = ui.kitti; let k = K.slots[K.active].length < 3 ? K.active : K.slots.findIndex(g => g.length < 3);
+  if (k < 0) return;
+  K.slots[k].push(c); sfx('card');
+  K.active = K.slots[k].length < 3 ? k : Math.max(0, K.slots.findIndex(g => g.length < 3));
+  render();
+}
+function kBack(k, c) { const g = ui.kitti.slots[k]; g.splice(g.findIndex(x => eqc(x, c)), 1); ui.kitti.active = k; render(); }
+function kClear() { ui.kitti.slots = [[], [], []]; ui.kitti.active = 0; render(); }
+function kAuto() { ui.kitti.slots = U.autoArrange(R.state.hand); ui.kitti.active = 0; sfx('card'); render(); }
+function kSubmit() { act({ type: 'submit', groups: ui.kitti.slots }); }
+
+// --- Marriage selection
+function mSel(i) { ui.msel = ui.msel === i ? null : i; sfx('step'); render(); }
+function mThrow() { const c = R.state.hand[ui.msel]; if (c) { ui.msel = null; act({ type: 'discard', card: c }); } }
+function mFinish() { const c = R.state.hand[ui.msel]; if (c) { ui.msel = null; act({ type: 'finish', card: c }); } }
+
+// --- Baag Chal clicks
+function bcClick(i) {
+  const s = R.state; if (!myTurn(R)) return;
+  if (s.turn === 'G' && s.placed < 20) return act({ type: 'move', from: null, to: i });
+  if (s.board[i] === s.turn && s.moves.some(m => m.from === i)) { ui.bcSel = ui.bcSel === i ? null : i; sfx('step'); return render(); }
+  if (ui.bcSel !== null) { const from = ui.bcSel; ui.bcSel = null; act({ type: 'move', from, to: i }); }
+}
+
+// --- Ludo board geometry (15x15 grid) and step-by-step token animation
+const LTRACK = [[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]];
+const LHOME = [[[7,1],[7,2],[7,3],[7,4],[7,5]], [[1,7],[2,7],[3,7],[4,7],[5,7]], [[7,13],[7,12],[7,11],[7,10],[7,9]], [[13,7],[12,7],[11,7],[10,7],[9,7]]];
+const LBASE = [[[2,2],[2,3],[3,2],[3,3]], [[2,11],[2,12],[3,11],[3,12]], [[11,11],[11,12],[12,11],[12,12]], [[11,2],[11,3],[12,2],[12,3]]];
+const LSTART = [0, 13, 26, 39], LSAFE_IDX = [0, 8, 13, 21, 26, 34, 39, 47];
+const PIPS = [[4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]];
+const ludoXY = (col, p, t) => p < 0 ? LBASE[col][t] : p <= 50 ? LTRACK[(p + LSTART[col]) % 52] : p < 56 ? LHOME[col][p - 51] : [7, 7];
+async function ludoAnimate(a, s) {
+  if (s.rolls !== a.rolls) { ui.diceUntil = Date.now() + 550; sfx('dice'); setTimeout(render, 560); }
+  if (!ui.lp || ui.lp.length !== s.pos.length) { ui.lp = s.pos.map(p => p.slice()); return; }
+  const id = ++ui.animId;
+  ui.anim++;
+  try {
+    const target = s.pos.map(p => p.slice()), caps = [];
+    for (let seat = 0; seat < target.length; seat++) for (let t = 0; t < 4; t++) {
+      if (ui.animId !== id || !ui.lp) return; // left the room or a newer update took over
+      const from = ui.lp[seat][t], to = target[seat][t];
+      if (to === from) continue;
+      if (to < from) { caps.push([seat, t]); continue; }
+      const path = from < 0 ? [0] : Array.from({ length: to - from }, (_, k) => from + 1 + k);
+      for (const p of path) { if (ui.animId !== id || !ui.lp) return; ui.lp[seat][t] = p; sfx('step'); render(); await sleep(150); }
+    }
+    if (caps.length) { sfx('cap'); buzz(60); }
+    if (ui.animId === id && ui.lp) ui.lp = target;
+  } finally { ui.anim--; render(); }
+}
+
+window.addEventListener('resize', () => { clearTimeout(window.rz); window.rz = setTimeout(render, 150); });
+fetch('/api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"type":"info"}' })
+  .then(r => r.json()).then(j => { INFO = j; render(); }).catch(() => toast('Cannot reach the game server'));
+if (code) connect(code); else render();
+</script>
+</body>
+</html>
